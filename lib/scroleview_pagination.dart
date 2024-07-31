@@ -15,9 +15,9 @@ class _MyHomePageState extends State<MyHomePage>  {
   final _url = 'https://jsonplaceholder.typicode.com/albums';
   int _page = 1;
   final int _limit = 20;
-  bool _hasNextPage = true; // 다음 페이지가 있는지 여부
-  bool _isFirstLoadRunning = false; // 첫번째 페이지 로딩중
-  bool _isLoadMoreRunning = false; // 다음페이지 로딩중
+  bool _hasNextPage = true;
+  bool _isFirstLoadRunning = false;
+  bool _isLoadMoreRunning = false;
   List _albumList = [];
   late ScrollController _controller;
 
@@ -28,18 +28,16 @@ class _MyHomePageState extends State<MyHomePage>  {
     _controller = ScrollController()..addListener(_nextLoad);
   }
 
-
   void initLoad() async {
     setState(() {
       _isFirstLoadRunning = true;
     });
-    try {
+    try{
       final res = await http.get(Uri.parse("$_url?_page=$_page&_limit=$_limit"));
       setState(() {
         _albumList = jsonDecode(res.body);
       });
-
-    } catch(e) {
+    }catch(e) {
       print(e.toString());
     }
 
@@ -47,35 +45,30 @@ class _MyHomePageState extends State<MyHomePage>  {
       _isFirstLoadRunning = false;
     });
   }
-
-  void _nextLoad() async {
+  void _nextLoad() async{
     print("nextLoad");
     if(_hasNextPage && !_isFirstLoadRunning && !_isLoadMoreRunning
         && _controller.position.extentAfter < 100) {
+
       setState(() {
         _isLoadMoreRunning = true;
       });
       _page += 1;
-      try {
+      try{
         final res = await http.get(Uri.parse("$_url?_page=$_page&_list=$_limit"));
         final List fetchedAlbums = json.decode(res.body);
         if(fetchedAlbums.isNotEmpty) {
           setState(() {
             _albumList.addAll(fetchedAlbums);
           });
-        } else { // 데이터가 비어있는 경우
-          setState(() {
-            _hasNextPage = false;
-          });
         }
-      } catch(e) {
+      }catch(e) {
         print(e.toString());
       }
 
       setState(() {
         _isLoadMoreRunning = false;
       });
-
     }
   }
 
